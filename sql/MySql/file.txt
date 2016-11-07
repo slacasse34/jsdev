@@ -1,0 +1,1 @@
+HSK/Org.sql: UTF-8 Unicode text

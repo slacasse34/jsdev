@@ -1,0 +1,9 @@
+  File: ‘HSK/Org.sql’
+  Size: 100031    	Blocks: 200        IO Block: 4096   regular file
+Device: fd00h/64768d	Inode: 17579275    Links: 1
+Access: (0664/-rw-rw-r--)  Uid: ( 1000/      sl)   Gid: ( 1000/      sl)
+Context: unconfined_u:object_r:user_home_t:s0
+Access: 2016-11-02 13:48:19.151013525 -0400
+Modify: 2016-11-02 13:48:19.156013525 -0400
+Change: 2016-11-06 12:36:48.660998755 -0500
+ Birth: -

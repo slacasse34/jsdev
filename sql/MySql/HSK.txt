@@ -1,0 +1,9 @@
+  File: ‘HSK/’
+  Size: 42        	Blocks: 0          IO Block: 4096   directory
+Device: fd00h/64768d	Inode: 165753      Links: 2
+Access: (0775/drwxrwxr-x)  Uid: ( 1000/      sl)   Gid: ( 1000/      sl)
+Context: unconfined_u:object_r:user_home_t:s0
+Access: 2016-11-06 12:36:44.034998865 -0500
+Modify: 2016-11-06 12:36:48.660998755 -0500
+Change: 2016-11-06 12:36:48.660998755 -0500
+ Birth: -

@@ -1,0 +1,63 @@
+DROP TABLE IF EXISTS FileEntry;
+DROP TABLE IF EXISTS DirEntry;
+DROP TABLE IF EXISTS Volume ;
+DROP TABLE IF EXISTS FileInfo; 
+
+# Pas sur entre faire des DROP TABLE ou des DROP DATABASE ???
+
+#DROP DATABASE IF EXIST FileInv
+
+#CREATE DATABASE FileInv
+#USE FileInv
+
+CREATE TABLE FileEntry (
+	VolId		INTEGER,
+	DirId		INTEGER,
+	Id		INTEGER,
+	FileName	VARCHAR(64),	# ‘HSK/Org.sql’
+	Size		BIGINT,		# 100031   
+	Blocks		INTEGER,	# 200
+	IOBlock		INTEGER,	# 4096
+	Inode		INTEGER,	# 17579275
+	Links		INTEGER,	# 1
+	Access		INTEGER,	# (0664/-rw-rw-r--)
+	Uid		INTEGER,	# ( 1000/      sl) 
+	Gid		INTEGER,	# ( 1000/      sl)
+	TAccess		TIMESTAMP,	# 2016-11-02 13:48:19.151013525 -0400
+	TModify		TIMESTAMP,	# 2016-11-02 13:48:19.156013525 -0400
+	TChange		TIMESTAMP,	# 2016-11-06 12:36:48.660998755 -0500
+	TBirth		TIMESTAMP,	# -
+	FileInfo	INTEGER
+);
+
+CREATE TABLE DirEntry (
+	DirId		INTEGER PRIMARY KEY AUTO_INCREMENT,
+	VolId		INTEGER,
+#	ParentId	INTEGER,
+	Path		VARCHAR(255),
+	KbSize		INTEGER
+);
+
+CREATE TABLE Volume (
+	VolId		INTEGER PRIMARY KEY AUTO_INCREMENT,
+	KbSize		INTEGER,
+	KbFree		INTEGER,
+	Label		VARCHAR(64)
+);
+
+CREATE TABLE FileInfo (
+	Cksum	INTEGER PRIMARY KEY,
+	Keyword	VARCHAR(32),
+	Info	VARCHAR(255)
+);
+
+CREATE INDEX ByFileSize ON FileEntry (Size);
+CREATE INDEX ByFileMod ON FileEntry (TModify);
+CREATE INDEX ByFileInfo ON FileEntry (FileInfo);
+
+ALTER TABLE DirEntry ADD FOREIGN KEY (VolId) REFERENCES Volume(VolId);
+ALTER TABLE FileEntry ADD FOREIGN KEY (DirId) REFERENCES DirEntry(DirId);
+ALTER TABLE FileEntry ADD FOREIGN KEY (VolId) REFERENCES Volume(VolId);
+ALTER TABLE FileEntry ADD FOREIGN KEY (FileInfo) REFERENCES FileInfo(Cksum);
+
+INSERT INTO FileInfo VALUES (CRC32('Data'),'Data','Data')
