@@ -1,2 +1,4 @@
 HSK/Org.sql: UTF-8 Unicode text
 mysqldump.sql: ASCII text
+FileInv.sql: UTF-8 Unicode text
+stat.txt:    UTF-8 Unicode text
