@@ -1,1 +1,2 @@
 HSK/Org.sql: UTF-8 Unicode text
+mysqldump.sql: ASCII text
