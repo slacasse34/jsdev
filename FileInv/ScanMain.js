@@ -3,47 +3,75 @@
  */
 "option strict"
 
-var DirList=[];
-var FileList=[];
+var DirList = [];
+var FileList = [];
 var fs = require('fs');
 
-function ScanDirTo(FromDir, OnDir, OnFile) {
-	var i;
-	var CurPath=FromDir;
-	var CurItem;
-	var RootDir=fs.statSync(FromDir);
+function IgnoreDir(Dir) {
+	return false;
+}
 
-	DirList.push(FromDir);
-	OnDir(FromDir, RootDir);
-	CurDir=fs.readdirSync(FromDir);
-	for(i=0; i<CurDir.length; i++) {
-		CurItem=CurPath+'\\'+CurDir[i];
-		console.log('stat('+CurItem+')');
-		CurEntry=fs.statSync(CurItem);
-		if(CurEntry.isDirectory()) {
+function ScanDirTo(FromDir, OnDir, OnFile) {
+	var RootDir = fs.statSync(FromDir);
+	var CurPath = FromDir;
+	var CurItem;
+	var i;
+	var Tot=0;
+	var FileSize=0;
+	var CurDir = fs.readdirSync(FromDir);
+
+	for (i = 0; i < CurDir.length; i++) {
+		// CurItem=String(CurPath).endswith('\\') ? CurPath+'\\'+CurDir[i] : CurPath+'\\'+CurDir[i];
+		CurItem = CurPath + '\\' + CurDir[i];
+		CurEntry = fs.statSync(CurItem);
+		if (CurEntry.isDirectory()) {
+			if (IgnoreDir(CurItem))
+				continue;
 			DirList.push(CurItem);
-			OnDir(CurItem, CurEntry);
+			Tot += ScanDirTo(CurItem, OnDir, OnFile);
+			OnDir(CurItem, CurEntry, Tot);
 		}
 		else {
 			FileList.push(CurEntry);
+			FileSize += CurEntry.size>>10;
 			OnFile(CurItem, CurEntry);
 		}
 	}
-
-	//for(CurDir=RootDir, i=0; i<DirList.length; i++, CurDir=DirList[i])
-	return i;
+	OnDir(FromDir, RootDir, Tot+FileSize);
+	return Tot+FileSize;
 }
 
-function DirEntryToConsole(Filename,DirEntry) {
+function ScanDiskTo(FromDir, OnDir, OnFile) {
+	var Tot;
+
+	DirList.push(FromDir);
+	Tot = ScanDirTo(FromDir, OnDir, OnFile);
+	return Tot;
+}
+
+
+
+/* Debug */
+function DirEntryToConsole(Filename, DirEntry, Kb) {
+	console.log(Filename);
+	console.log(DirEntry.size, Kb);
+}
+
+function FileEntryToConsole(Filename, DirEntry) {
 	console.log(Filename);
 	console.log(DirEntry.size);
 }
+
+
 /*
  * Main()
  */
-if(process.argv.length!=3) {
-	console.log('Usage: '+process.argv[1]+' StartFolder');
+if (process.argv.length != 3) {
+	console.log('Usage: ' + process.argv[1] + ' StartFolder');
 	return;
 }
 
-ScanDirTo(process.argv[2], DirEntryToConsole, DirEntryToConsole);
+var KbSize=ScanDiskTo(process.argv[2], DirEntryToConsole, FileEntryToConsole);
+console.log(KbSize+' Kb');
+console.log('Filelist:' + FileList.length);
+console.log('Dirlist:' + DirList.length);
