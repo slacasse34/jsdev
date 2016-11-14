@@ -3,7 +3,7 @@
  */
 "option strict"
 
-var MysqlServ='192.168.72.128';
+var MysqlServ='192.168.72.129';
 var DirList = [];
 var FileList = [];
 var fs = require('fs');
@@ -104,7 +104,11 @@ function GetLastVolId() {
 	console.log('GetLastVolId() ==>' +rv + ' in '+i+' iterations');
 	return rv;
 }
-
+/*********************************************
+ * Original ScanDiskTo
+ * nodejs can't provide arguments to sub-programs on the command line,
+ * nor thru the environnement
+ * Use manual invocation instead
 function ScanDiskTo(FromDir, NewDir, OnDir, OnFile) {
 	var Tot;
 	var VolId;
@@ -121,15 +125,30 @@ function ScanDiskTo(FromDir, NewDir, OnDir, OnFile) {
 	Tot = ScanDirTo(FromDir, NewDir, OnDir, OnFile, VolId);
 	return Tot;
 }
+*/
 
+function ScanDiskTo(FromDir, NewDir, OnDir, OnFile) {
+	var VolId;
+	var Tot;
+
+	VolId=GetLastVolId();
+	// Load folders
+	DirList.push(FromDir);
+	Tot = ScanDirTo(FromDir, NewDir, OnDir, OnFile, VolId);
+	return Tot;
+}
 function NewDirEntryToDb(Filename, DirEntry, Volume) {
 	var rv=0;
 	var i=0;
+	var Entry = {
+		VolId : Volume,
+		Path : Filename
+	};
 	//console.log(Filename);
 	connection.query(
 		{
-			sql: "INSERT INTO DirEntry VALUES(DEFAULT,?,?,DEFAULT)",
-			values: Volume, Filename
+			sql: "INSERT INTO DirEntry SET ?",
+			values: Entry
 		},
 		function(err, rows, fields) {
 			if(err) throw err;
@@ -149,7 +168,7 @@ function UpdateDbDirEntry(Filename, DirEntry, Id, Kb) {
 	connection.query(
 		{
 			sql: "UPDATE DirEntry SET KbSize=? WHERE DirId=?",
-			values: Kb, Id
+			values: [Kb, Id]
 		},
 		function(err, rows, fields) {
 			if(err) throw err;
@@ -161,11 +180,30 @@ function UpdateDbDirEntry(Filename, DirEntry, Id, Kb) {
 }
 function FileEntryToDb(Filename, DirEntry, Volume, Parent) {
 	var rv=0;
+	var Entry={
+		VolId: Volume
+		DirId: Parent,
+		FileName: Filename,
+		Size: DirEntry.size,
+		Blocks: DirEntry.blocks,
+		IOBlock: DirEntry.blocksize,
+		Inode: DirEntry.ino,
+		Links: DirEntry.nlink,
+		Access: DirEntry.Access,
+		Uid: DirEntry.uid,
+		Gid: DirEntry.gid,
+		TAccess: DirEntry.atime,
+		TModif: DirEntry.mtime,
+		TChange: DirEntry,ctime,
+		TBirth: DirEntry.birthtime,
+		FileInfo: 230775901
+
+	};
 	//console.log(Filename);
 	connection.query(
 		{
-			sql: "INSERT INTO FileEntry VALUES(DEFAULT,?,?,DEFAULT)",
-			values: Volume, Filename
+			sql: "INSERT INTO FileEntry SET ?",
+			values: Entry
 		},
 		function(err, rows, fields) {
 			if(err) throw err;
