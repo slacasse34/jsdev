@@ -3,12 +3,12 @@
  */
 "option strict"
 
-var MysqlServ='192.168.72.129';
+var MysqlServ = '192.168.72.131';
 var DirList = [];
 var FileList = [];
 var fs = require('fs');
 var mysql = require('mysql');   // npm install mysql
-var BatchFile=require('child_process');
+var BatchFile = require('child_process');
 //var sleep = require('sleep');
 
 var connection = mysql.createConnection({
@@ -19,12 +19,12 @@ var connection = mysql.createConnection({
 });
 
 function OnDbErr(err) {
-	console.log('Got Db error:'+err);
+	console.log('Got Db error:' + err);
 }
 
 function DbConnect(Host) {
-	if(Host!=undefined)
-		connection.host=Host;
+	if (Host != undefined)
+		connection.host = Host;
 	connection.connect(OnDbErr);
 	return connection.err;
 }
@@ -33,23 +33,23 @@ function DbDisconnect() {
 	connection.end(OnDbErr);
 }
 /*
-connection.connect(function(err){
-	if(err) throw err;
-	connection.query(
-		{
-			sql: 'select * from FileInfo'
-		},
-		function(err, rows, fields) {
-			if(err) throw err;
-			console.log('Input!');
-			for(var a=0; a<rows.length; a++){
-				console.log(rows[a]);
-			}
-			connection.end();
-		}
-	)
-});
-*/
+ connection.connect(function(err){
+ if(err) throw err;
+ connection.query(
+ {
+ sql: 'select * from FileInfo'
+ },
+ function(err, rows, fields) {
+ if(err) throw err;
+ console.log('Input!');
+ for(var a=0; a<rows.length; a++){
+ console.log(rows[a]);
+ }
+ connection.end();
+ }
+ )
+ });
+ */
 function IgnoreDir(Dir) {
 	return false;
 }
@@ -64,7 +64,7 @@ function ScanDirTo(FromDir, NewDir, OnDir, OnFile, Volume) {
 	var CurDir = fs.readdirSync(FromDir);
 	var CurEntry;
 
-	Parent=NewDir(FromDir, DirStat, Volume);
+	Parent = NewDir(FromDir, DirStat, Volume);
 	for (i = 0; i < CurDir.length; i++) {
 		// CurItem=String(CurPath).endswith('\\') ? CurPath+'\\'+CurDir[i] : CurPath+'\\'+CurDir[i];
 		CurItem = CurPath + '\\' + CurDir[i];
@@ -86,63 +86,81 @@ function ScanDirTo(FromDir, NewDir, OnDir, OnFile, Volume) {
 	return Tot + FileSize;
 }
 
-
+/* Infinite loop
 function GetLastVolId() {
-	var rv=0;
-	var i=0;
+	var rv = 0;
+	var i = 0;
 
 	connection.query(
 		{
 			sql: 'SELECT MAX(VolId) FROM Volume'
 		},
-		function(err, rows, fields) {
-			if(err) throw err;
-			rv=rows[0];
+		function (err, rows, fields) {
+			if (err) throw err;
+			rv = rows[0];
 		});
-	for(i=0; rv==0 /*&& i<60000*/; i++);
+	for (i = 0; rv == 0; i++);
 	//	sleep.usleep(1000);
-	console.log('GetLastVolId() ==>' +rv + ' in '+i+' iterations');
+	console.log('GetLastVolId() ==>' + rv + ' in ' + i + ' iterations');
 	return rv;
+}
+*/
+function GetLastVolId(callback) {
+	var rv = 0;
+
+	connection.query(
+		{
+			sql: 'SELECT MAX(VolId) FROM Volume'
+		},
+		function (err, rows, fields) {
+			if (err) throw err;
+			rv = rows[0];
+			callback(err, rv);
+		});
+
 }
 /*********************************************
  * Original ScanDiskTo
  * nodejs can't provide arguments to sub-programs on the command line,
  * nor thru the environnement
  * Use manual invocation instead
+ */
+var VolId;
 function ScanDiskTo(FromDir, NewDir, OnDir, OnFile) {
 	var Tot;
-	var VolId;
-	var VolInsert="..\\Volume.bat";
-	var ChildArgs=[FromDir];
+	var VolInsert = "..\\Volume.bat";
+	var ChildArgs = [FromDir, MysqlServ];
 
 	// Need to use an external script to add Volume information
 	//console.log(BatchFile.env.);
 	BatchFile.execFileSync(VolInsert, ChildArgs);
 	// Need to get back the Volume Id
-	VolId=GetLastVolId();
+	GetLastVolId(function (err,value) {VolId=value;});
 	// Load folders
 	DirList.push(FromDir);
 	Tot = ScanDirTo(FromDir, NewDir, OnDir, OnFile, VolId);
 	return Tot;
 }
-*/
 
-function ScanDiskTo(FromDir, NewDir, OnDir, OnFile) {
-	var VolId;
-	var Tot;
+/*
+ function ScanDiskTo(FromDir, NewDir, OnDir, OnFile) {
+ var VolId;
+ var Tot;
 
-	VolId=GetLastVolId();
-	// Load folders
-	DirList.push(FromDir);
-	Tot = ScanDirTo(FromDir, NewDir, OnDir, OnFile, VolId);
-	return Tot;
-}
+ VolId=GetLastVolId();
+ // Load folders
+ DirList.push(FromDir);
+ Tot = ScanDirTo(FromDir, NewDir, OnDir, OnFile, VolId);
+ return Tot;
+ }
+ */
+
 function NewDirEntryToDb(Filename, DirEntry, Volume) {
-	var rv=0;
-	var i=0;
+	var rv = 0;
+	var i = 0;
 	var Entry = {
-		VolId : Volume,
-		Path : Filename
+		VolId: Volume,
+		Path: Filename
 	};
 	//console.log(Filename);
 	connection.query(
@@ -150,38 +168,38 @@ function NewDirEntryToDb(Filename, DirEntry, Volume) {
 			sql: "INSERT INTO DirEntry SET ?",
 			values: Entry
 		},
-		function(err, rows, fields) {
-			if(err) throw err;
-			rv=row.insertId;
-			console.log("added "+ rv);
+		function (err, rows, fields) {
+			if (err) throw err;
+			rv = row.insertId;
+			console.log("added " + rv);
 		}
 	);
-	for(i=0; rv==0 /*&& i<60000*/; i++);
+	for (i = 0; rv == 0 /*&& i<60000*/; i++);
 	//	sleep.usleep(1000);
-	console.log('NewDirEntryToDb() ==>' +rv + ' in '+i+' iterations');
+	console.log('NewDirEntryToDb() ==>' + rv + ' in ' + i + ' iterations');
 	return rv;
 }
 
 function UpdateDbDirEntry(Filename, DirEntry, Id, Kb) {
-	var rv=0;
+	var rv = 0;
 	//console.log(Filename);
 	connection.query(
 		{
 			sql: "UPDATE DirEntry SET KbSize=? WHERE DirId=?",
 			values: [Kb, Id]
 		},
-		function(err, rows, fields) {
-			if(err) throw err;
-			rv=0;
-			console.log("Updated dir #"+ Id);
+		function (err, rows, fields) {
+			if (err) throw err;
+			rv = 0;
+			console.log("Updated dir #" + Id);
 		}
 	);
 	return rv;
 }
 function FileEntryToDb(Filename, DirEntry, Volume, Parent) {
-	var rv=0;
-	var Entry={
-		VolId: Volume
+	var rv = 0;
+	var Entry = {
+		VolId: Volume,
 		DirId: Parent,
 		FileName: Filename,
 		Size: DirEntry.size,
@@ -194,7 +212,7 @@ function FileEntryToDb(Filename, DirEntry, Volume, Parent) {
 		Gid: DirEntry.gid,
 		TAccess: DirEntry.atime,
 		TModif: DirEntry.mtime,
-		TChange: DirEntry,ctime,
+		TChange: DirEntry, ctime,
 		TBirth: DirEntry.birthtime,
 		FileInfo: 230775901
 
@@ -205,10 +223,10 @@ function FileEntryToDb(Filename, DirEntry, Volume, Parent) {
 			sql: "INSERT INTO FileEntry SET ?",
 			values: Entry
 		},
-		function(err, rows, fields) {
-			if(err) throw err;
-			rv=row.insertId;
-			console.log('FileEntryToDb() ==>' +rv);
+		function (err, rows, fields) {
+			if (err) throw err;
+			rv = row.insertId;
+			console.log('FileEntryToDb() ==>' + rv);
 		}
 	);
 	return rv;
@@ -233,9 +251,9 @@ if (process.argv.length != 3) {
 	console.log('Usage: ' + process.argv[1] + ' StartFolder');
 	return;
 }
-if(process.env.MYSQLSERV!=undefined)
-	MysqlServ=process.env.MYSQLSERV;
-if(DbConnect(undefined))
+if (process.env.MYSQLSERV != undefined)
+	MysqlServ = process.env.MYSQLSERV;
+if (DbConnect(undefined))
 	return;
 var KbSize = ScanDiskTo(process.argv[2], NewDirEntryToDb, UpdateDbDirEntry, FileEntryToDb);
 console.log(KbSize + ' Kb');
