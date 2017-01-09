@@ -1,0 +1,18 @@
+CREATE TABLE Facture (
+	id INTEGER NOT NULL AUTO_INCREMENT,
+	nom VARCHAR(32) NOT NULL,
+	date_creation DATETIME NOT NULL,
+	paye TINYINT NOT NULL,
+	PRIMARY KEY(`id`) 
+);
+
+CREATE TABLE Ligne_Facture (
+	id INTEGER NOT NULL AUTO_INCREMENT,
+	montant INTEGER NOT NULL,
+	quantite INTEGER NOT NULL,
+	produit VARCHAR(32) NOT NULL,
+	facture_id INTEGER NOT NULL,
+	PRIMARY KEY(`id`) 
+);
+CREATE INDEX FactId ON Ligne_Facture(facture_id);
+ALTER TABLE Ligne_Facture ADD FOREIGN KEY (facture_id) REFERENCES Facture(id);

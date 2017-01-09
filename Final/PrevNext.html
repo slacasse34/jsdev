@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>Inner HTML from server</title>
+        <meta charset="windows-1252">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<Script>
+		var request = new XMLHttpRequest();
+		function OnNext() {
+			request.open("GET", "http://localhost:8080/NextFile.html", true);
+			request.send();
+			OnData();
+		}
+		function OnPrev() {
+			request.open("GET", "http://localhost:8080/PrevFile.html", true);
+			request.send();
+			OnData();
+		}
+	</Script>
+    </head>
+    <body>
+	<div id="main"><h1>Not using innerhtml yet!</h1></div>
+	<span><button type="button" onclick="OnPrev()">Prev</button> 
+	<button type="button" onclick="OnNext()">Next</button> </span>
+	<script>
+	function OnData() {
+		request.onreadystatechange = function() {
+			if ( this.readyState == 4 && this.status == 200 ) {
+				// ici, on peut agir…
+				console.log(this.responseText); // ou bien…
+				//var data = JSON.parse(this.responseText);
+				main.innerHTML=this.responseText;
+			}
+		}
+	}
+	</script>
+    </body>
+</html>

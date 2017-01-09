@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head onload="OnLoadHead()">
+        <title id="Title">Inner HTML from server</title>
+        <meta charset="windows-1252">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <Script>
+	    var request = new XMLHttpRequest();
+	    var PrevRecord = 1;
+	    var CurRecord = 1;
+
+	    function GetCurId() {
+		    return CurRecord;
+	    }
+	    function NextRec() {
+		    return ++CurRecord;
+	    }
+	    function PrevRec() {
+		    if (CurRecord === 1)
+			    return 1;
+		    return --CurRecord;
+	    }
+	    function MakeTable(json) {
+		    var Table = '<table id="VolTable">';
+		    var CurJRecord = json[0]; // Number, Number, Number, Text
+		    var Prefix = "";
+		    var Suffix = "";
+		    for (var Key in CurJRecord) {
+			    Table += "<tr>";
+			    Table += "<td>" + Key + "</td>";
+			    Table += "<td>" + Prefix + CurJRecord[Key] + Suffix + "</td>";
+			    Table += "</tr>";
+			    if (Key === "KbFree") {
+				    Prefix = '<input type="text" id="Id' + Key + '" value="';
+				    Suffix = '">';
+			    } else {
+				    Prefix = '<input type="number" id="Id' + Key + '" value=';
+				    Suffix = '>';
+			    }
+		    }
+		    Table += "</table>";
+		    return Table;
+	    }
+	    function InputForm() {
+		    var r = document.getElementById("Record");
+		    var s = document.getElementById("BtnSpan");
+		    var NewForm = '<Form id=FrmNewRecord method="POST"  action="http://localhost:8080/?">\n\
+                <table id="TblNewForm">\n\
+                <tr>\n\
+                <td>KbSize</td>\
+                <td><input type="number" id="IdKbSize"</td>\
+                </tr>\n\
+                <tr>\n\
+                <td>KbFree</td>\
+                <td><input type="number" id="IdKbFree"</td>\
+                </tr>\n\
+                <tr>\n\
+                <td>Label</td>\
+                <td><input type="text" id="IdLabel"</td>\
+                </tr>\n\
+                </table>\n\
+                <span><button type=submit onclick="OnAdd()">Add</button>\
+            <button type="button" onclick="CurrentRecord()">Cancel</button>\
+            </span>\n\
+                </form>';
+		    //s.setAttribute()
+		    r.innerHTML = NewForm;
+	    }
+	    function CurrentRecord() {
+		    request.open("GET", "http://localhost:8080/Volume/" + CurRecord, true);
+		    request.send();
+		    OnData();
+	    }
+	    function OnNext() {
+		    PrevRecord = CurRecord;
+		    CurRecord++;
+		    request.open("GET", "http://localhost:8080/Volume/" + CurRecord, true);
+		    request.send();
+		    OnData();
+	    }
+	    function OnPrev() {
+		    if (CurRecord === 1)
+			    return;
+		    PrevRecord = CurRecord;
+		    CurRecord--;
+		    request.open("GET", "http://localhost:8080/Volume/" + CurRecord, true);
+		    request.send();
+		    OnData();
+	    }
+	    function OnNew() {
+		    InputForm();
+		    //request.open("POST", "http://localhost:8080", true);
+		    //request.send();
+		    //OnData();
+	    }
+	    function OnAdd() {
+                //document.getElementById("FrmNewRecord").submit();
+		    //request.open("POST", "http://localhost:8080", true);
+		    //request.send();
+		    //OnData();
+	    }
+	    function OnDel() {
+		    request.open("GET", "http://localhost:8080/NextFile.html", true);
+		    request.send();
+		    OnData();
+	    }
+	    function OnLoadHead() {
+		    var h = document.getElementById("MainHeader");
+		    h.innerHTML = "From Javascript!";
+		    console.log("OnLoadHead");
+	    }
+        </Script>
+    </head>
+    <body>
+        <div id="main"><h1 id="MainHeader">Volume</h1></div>
+        <div id="Record" onload="CurrentRecord()"></div>
+        <span>
+            <button type="button" onclick="OnPrev()">Prev</button> 
+            <button type="button" onclick="OnNext()">Next</button> 
+            <button type="button" onclick="OnNew()">New</button> 
+            <button type="button" onclick="OnDel()">Delete</button> 
+        </span>
+        <script>
+	    function OnData() {
+		    request.onreadystatechange = function () {
+			    if (this.readyState == 4 && this.status == 200) {
+				    // ici, on peut agir…
+				    console.log(this.responseText); // ou bien…
+				    var data = JSON.parse(this.responseText);
+				    console.log(data);
+				    console.log(data.length);
+				    var Table = MakeTable(data);
+				    console.log(Table);
+				    Record.innerHTML = Table;
+			    }
+			    if (this.readyState == 4 && this.status == 404) {
+				    CurRecord = PrevRecord;
+				    alert(this.response);
+			    }
+		    }
+	    }
+        </script>
+    </body>
+</html>

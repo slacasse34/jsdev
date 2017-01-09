@@ -1,0 +1,25 @@
+ <!DOCTYPE html>
+
+ <html>
+    <head>
+        <title id="Title">POST test form</title>
+        <meta charset="windows-1252">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <form id="FrmNewRecord" method="POST" action="http://localhost:8080">
+                <table id="TblNewForm">
+                <tbody><tr>
+                <td>KbSize</td><td><input type="number" name="KbSize" id="IdKbSize"></td></tr>
+                <tr>
+                <td>KbFree</td><td><input type="number" name="KbFree" id="IdKbFree"></td></tr>
+                <tr>
+                <td>Label</td><td><input type="text" name="Label" id="IdLabel"></td></tr>
+                </tbody></table>
+                <span><button type="submit" onclick="OnAdd()">Add</button>
+			<button type="button" onclick="CurrentRecord()">Cancel</button>
+		</span>
+        </form>        
+    </body>
+</html>
+
