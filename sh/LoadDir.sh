@@ -2,8 +2,9 @@
 #	$1:	VolId
 #	$2:	DirId
 #	$3	DirFSpec
+FILEINFO=0
 MYSQL=">>/tmp/LoadDir.out"
-cd $3
+cd "$3"
 TMP=/tmp/LoadDir.txt
 echo INSERT INTO DirEntry VALUES \(DEFAULT,$1,\'$3\'\)\;
 CURDIR=$2

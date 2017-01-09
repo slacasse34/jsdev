@@ -21,8 +21,8 @@ pool.query(
 	},
 	function (err, rows, fields) {
 		if (err) throw err;
-	for(var i=0; i<rows.length; i++) {
-		console.log(rows[i]);
+		for(var i=0; i<rows.length; i++) {
+			console.log(rows[i]);
 	}
 });
 

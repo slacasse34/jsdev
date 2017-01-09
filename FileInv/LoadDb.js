@@ -3,8 +3,10 @@
  */
 "option strict"
 
-var MysqlServ = '192.168.72.131';
+var MysqlServ = '192.168.72.129';
 var mysql = require('mysql');   // npm install mysql
+var fs = require('fs');
+var readline = require('readline');
 
 var connection = mysql.createConnection({
 	host: MysqlServ,
@@ -15,6 +17,7 @@ var connection = mysql.createConnection({
 
 function OnDbErr(err) {
 	console.log('Got Db error:' + err);
+	DbDisconnect();
 }
 
 function DbConnect(Host) {
@@ -30,14 +33,13 @@ function DbDisconnect() {
 
 function LoadDb(ScriptFile, HandleEntry) {
 	var rv = 0;
-	var InFP = new File(ScriptFile);
-
-	InFP.open("rt");
-	while(!InFP.eof) {
-		HandleEntry(InFP.readln());
-	}
-	InFP.close();
-	return rv;
+	var InFP = new fs.createReadStream(ScriptFile);
+	var rl = readline.createInterface({
+		input: entree
+	});
+	rl.on('line',  (line) => {
+		HandleEntry(${line});
+	});
 }
 
 /* Handle query */
@@ -70,6 +72,5 @@ if (process.argv.length != 3) {
 }
 if (DbConnect(undefined))
 	return;
-//LoadDb(process.argv[2], EntryToDb);
-LoadDb(process.argv[2], EntryToConsole);
-DbDisconnect();
+LoadDb(process.argv[2], EntryToDb);
+//LoadDb(process.argv[2], EntryToConsole);
