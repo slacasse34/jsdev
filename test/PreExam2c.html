@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>PreExam2c</title>
+        <meta charset="windows-1252">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        function jjj() {
+            var i, j;
+            var CurRow="";
+            var Val="";
+            var NewNode=document.createTextNode("<h2>Some H2 Text</h2>");
+            for(i=0; i<3; i++) {
+                for(CurRow="", j=0; j<3; j++)
+                    CurRow+='<tr><td id="'+i*3+j+'">'+i*3+j+'</td></tr>';
+                Val+=CurRow;
+            }
+            Val='<table>'+Val+'</table>';
+            console.log(Val);
+            //document.getElementById("main").innerHtml=Val;
+            document.getElementById("main").innerHTML=Val;
+
+            //document.getElementById("b").appendChild(NewNode);
+        }
+    </script>
+    </head>
+    <body id="b" onload="jjj()">
+        <h1 id="main" >Init val</h1>
+    </body>
+</html>
